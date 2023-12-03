@@ -33,7 +33,6 @@
     </appender>
 
     <root level="debug">
-        <appender-ref ref="memoryAppender"/>
         <appender-ref ref="console"/>
         <appender-ref ref="file"/>
     </root>

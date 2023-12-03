@@ -12,11 +12,3 @@ fun evalFile(scriptFile: File): ResultWithDiagnostics<EvaluationResult> {
     val compilationConfiguration = createJvmCompilationConfigurationFromTemplate<ScriptDef>()
     return BasicJvmScriptingHost().eval(scriptFile.toScriptSource(), compilationConfiguration, null)
 }
-
-fun printResults(res: ResultWithDiagnostics<EvaluationResult>){
-    res.reports.forEach {
-        if (it.severity > ScriptDiagnostic.Severity.DEBUG) {
-            println(" : ${it.message}" + if (it.exception == null) "" else ": ${it.exception}")
-        }
-    }
-}
