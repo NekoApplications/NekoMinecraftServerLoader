@@ -1,6 +1,5 @@
-package net.zhuruoling.nmsl.minecraft.mod
+package net.zhuruoling.nmsl.minecraft.mod.loader
 
-import net.zhuruoling.nmsl.minecraft.mod.loader.*
 import java.lang.IllegalArgumentException
 
 class ModLoader(val id: String, val version:String, val installer: ModLoaderInstaller) {

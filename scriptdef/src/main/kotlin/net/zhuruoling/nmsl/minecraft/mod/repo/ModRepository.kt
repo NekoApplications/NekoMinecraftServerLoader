@@ -1,5 +1,6 @@
-package net.zhuruoling.nmsl.minecraft.mod
+package net.zhuruoling.nmsl.minecraft.mod.repo
 
+import net.zhuruoling.nmsl.minecraft.mod.loader.ModLoader
 import java.lang.IllegalArgumentException
 
 data class Mod(val minecraftVersion: String, val modLoader: ModLoader, val modId: String, val downloadUrl: String)

@@ -1,6 +1,5 @@
 package net.zhuruoling.nmsl
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.zhuruoling.nmsl.scripting.ScriptDef
 import net.zhuruoling.nmsl.scripting.evalFile
@@ -30,22 +29,21 @@ fun main(args: Array<String>) {
 
     evalFile(file).apply {
         reports.forEach {
-            val message =  (it.message + if (it.exception == null) "" else ": ${it.exception}")
             when(it.severity){
                 ScriptDiagnostic.Severity.DEBUG -> {
-                    logger.debug(message)
+                    logger.debug(it.render(withSeverity = false))
                 }
                 ScriptDiagnostic.Severity.INFO -> {
-                    logger.info(message)
+                    logger.info(it.render(withSeverity = false))
                 }
                 ScriptDiagnostic.Severity.WARNING -> {
-                    logger.warn(message)
+                    logger.warn(it.render(withSeverity = false))
                 }
                 ScriptDiagnostic.Severity.ERROR -> {
-                    logger.error(message)
+                    logger.error(it.render(withSeverity = false))
                 }
                 ScriptDiagnostic.Severity.FATAL -> {
-                    logger.error("[FATAL]$message")
+                    logger.error("[FATAL] ${it.render(withSeverity = false)}")
                 }
             }
         }

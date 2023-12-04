@@ -3,6 +3,8 @@ package net.zhuruoling.nmsl.scripting
 import kotlinx.coroutines.runBlocking
 import net.zhuruoling.nmsl.minecraft.MinecraftConfigurationHandlerScope
 import net.zhuruoling.nmsl.minecraft.MinecraftServerConfig
+import org.slf4j.LoggerFactory
+import kotlin.io.path.Path
 import kotlin.script.experimental.annotations.KotlinScript
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.dependencies.*
@@ -16,12 +18,17 @@ import kotlin.script.experimental.jvm.jvm
     fileExtension = "script.kts",
     compilationConfiguration = ScriptConfiguration::class
 )
-abstract class ScriptDef{
+abstract class ScriptDef {
 
     val serverConfig = MinecraftServerConfig()
-
-    fun minecraft(block: MinecraftConfigurationHandlerScope.() -> Unit){
+    val workingDir = Path(".").toAbsolutePath()
+    val logger = LoggerFactory.getLogger("Script")
+    fun minecraft(block: MinecraftConfigurationHandlerScope.() -> Unit) {
         MinecraftConfigurationHandlerScope(serverConfig).block()
+    }
+
+    fun procedure(id: String, block: () -> Unit) {
+        serverConfig.procedures += id to block
     }
 }
 
@@ -39,9 +46,38 @@ fun configureMavenDepsOnAnnotations(context: ScriptConfigurationRefinementContex
 
 private val resolver = CompoundDependenciesResolver(FileSystemDependenciesResolver(), MavenDependenciesResolver())
 
-object ScriptConfiguration: ScriptCompilationConfiguration({
+object ScriptConfiguration : ScriptCompilationConfiguration({
     defaultImports(DependsOn::class, Repository::class)
     defaultImports("net.zhuruoling.nmsl.minecraft.mod.*")
+    defaultImports("net.zhuruoling.nmsl.minecraft.mod.loader.*")
+    defaultImports("net.zhuruoling.nmsl.minecraft.mod.repo.*")
+    defaultImports(
+        "java.io.*",
+        "java.nio.*",
+        "java.nio.charset.*",
+        "java.nio.file.*",
+        "java.nio.channel.*",
+        "java.lang.*",
+        "java.math.*",
+        "java.net.*",
+        "java.util.*",
+        "java.concurrent.*",
+        "java.regex.*",
+        "java.stream.*",
+        "java.zip.*",
+        "java.random.*",
+        "java.function.*"
+    )
+    defaultImports(
+        "kotlin.io.*",
+        "kotlin.coroutines.*",
+        "kotlin.collections.*",
+        "kotlin.random.*",
+        "kotlin.reflect.*",
+        "kotlin.*",
+        "kotlin.text.*",
+        "kotlin.math.*"
+    )
     jvm {
         dependenciesFromCurrentContext(wholeClasspath = true)
     }
