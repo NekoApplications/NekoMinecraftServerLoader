@@ -1,11 +1,11 @@
 package net.zhuruoling.nmsl.task.minecraft
 
-class DownloadServerJarTask: ServerConfigureTask() {
-    override fun invoke(context: ServerConfigureTaskContext) {
+class DownloadServerJarTask(private val version:String): ServerConfigureTask() {
+    override fun run(context: ServerConfigureTaskContext) {
         TODO("Not yet implemented")
     }
 
     override fun describe(): String {
-        TODO("Not yet implemented")
+        return "DownloadServerJar:${version}"
     }
 }

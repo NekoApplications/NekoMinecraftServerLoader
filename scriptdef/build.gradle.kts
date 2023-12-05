@@ -11,6 +11,5 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven")
     // coroutines dependency is required for this particular definition
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-
     compileOnly("org.slf4j:slf4j-api:1.7.36")
 }

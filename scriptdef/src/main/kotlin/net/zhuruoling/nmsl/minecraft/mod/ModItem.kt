@@ -1,17 +1,23 @@
 package net.zhuruoling.nmsl.minecraft.mod
 
-data class ModItem(val modid:String, val version: String, val rename:String?) {}
+data class ModItem(val modid: String, val version: String, val rename: String?) {
+    override fun toString(): String {
+        return ("$modid[Version:$version") + if (rename != null)
+            ", Rename:$rename]"
+        else "]"
+    }
+}
 
-class ModsConfigurationHandlerScope(private val set:HashSet<ModItem>){
+class ModsConfigurationHandlerScope(private val set: HashSet<ModItem>) {
 
     val scopes: HashSet<ModItemConfigurationHandlerScope> = HashSet()
 
-    fun modid(id:String): ModItemConfigurationHandlerScope {
-        return ModItemConfigurationHandlerScope(id,this)
+    fun modid(id: String): ModItemConfigurationHandlerScope {
+        return ModItemConfigurationHandlerScope(id, this)
     }
 
-    fun modid(id: String, block: ModItemConfigurationHandlerScope.() -> Unit) : ModItemConfigurationHandlerScope {
-        return ModItemConfigurationHandlerScope(id,this).apply(block)
+    fun modid(id: String, block: ModItemConfigurationHandlerScope.() -> Unit): ModItemConfigurationHandlerScope {
+        return ModItemConfigurationHandlerScope(id, this).apply(block)
     }
 
     fun getMods(): HashSet<ModItem> {
@@ -20,19 +26,19 @@ class ModsConfigurationHandlerScope(private val set:HashSet<ModItem>){
     }
 }
 
-class ModItemConfigurationHandlerScope(private val modid:String, private val parent:ModsConfigurationHandlerScope ){
+class ModItemConfigurationHandlerScope(private val modid: String, private val parent: ModsConfigurationHandlerScope) {
     var version = "latestStable"
-    private var rename:String? = null
+    private var rename: String? = null
 
     init {
         parent.scopes += this
     }
 
-    fun rename(name:String){
+    fun rename(name: String) {
         rename = name
     }
 
-    fun version(v:String){
+    fun version(v: String) {
         version = v
     }
 
@@ -40,7 +46,7 @@ class ModItemConfigurationHandlerScope(private val modid:String, private val par
         return ModItem(modid, version, rename)
     }
 
-    operator fun invoke(block: ModItemConfigurationHandlerScope.() -> Unit){
+    operator fun invoke(block: ModItemConfigurationHandlerScope.() -> Unit) {
         this.block()
     }
 
@@ -59,6 +65,6 @@ class ModItemConfigurationHandlerScope(private val modid:String, private val par
     }
 }
 
-infix fun ModItemConfigurationHandlerScope.version(version:String){
+infix fun ModItemConfigurationHandlerScope.version(version: String) {
     this.version = version
 }

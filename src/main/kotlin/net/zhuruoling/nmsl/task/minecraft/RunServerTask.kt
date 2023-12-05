@@ -1,11 +1,15 @@
 package net.zhuruoling.nmsl.task.minecraft
 
-class RunServerTask: ServerConfigureTask() {
-    override fun invoke(context: ServerConfigureTaskContext) {
+class RunServerTask(val jvmArgs: HashSet<String>, val serverArgs: HashSet<String>) : ServerConfigureTask() {
+    override fun run(context: ServerConfigureTaskContext) {
         TODO("Not yet implemented")
     }
 
     override fun describe(): String {
-        TODO("Not yet implemented")
+        return "RunServer:WithJvmArgs${
+            jvmArgs.joinToString(", ", "[", "]")
+        }:WithServerArgs${
+            serverArgs.joinToString(", ", "[", "]")
+        }"
     }
 }
