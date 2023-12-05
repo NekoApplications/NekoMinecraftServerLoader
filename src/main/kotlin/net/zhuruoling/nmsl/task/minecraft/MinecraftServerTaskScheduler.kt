@@ -16,12 +16,24 @@ object MinecraftServerTaskScheduler: TaskScheduler<MinecraftServerConfig>() {
                 result.addTask(DownloadModTask(it, src.modRepositories))
             }
         }
-        src.launchConfiguration.beforeExecutes.forEach {
-            result.addTask(RunProcedureTask(it, src.procedures[it]!!))
-        }
-        result.addTask(RunServerTask(src.launchConfiguration.jvmArgs, src.launchConfiguration.args))
-        src.launchConfiguration.afterExecutes.forEach {
-            result.addTask(RunProcedureTask(it, src.procedures[it]!!))
+
+        when(src.action){
+            "runServer" -> {
+                src.launchConfiguration.beforeExecutes.forEach {
+                    result.addTask(RunProcedureTask(it, src.procedures[it]!!))
+                }
+                result.addTask(RunServerTask(src.launchConfiguration.jvmArgs, src.launchConfiguration.args))
+                src.launchConfiguration.afterExecutes.forEach {
+                    result.addTask(RunProcedureTask(it, src.procedures[it]!!))
+                }
+            }
+            "buildServerZip" -> {
+                src.launchConfiguration.beforeExecutes.forEach {
+                    result.addTask(RunProcedureTask(it, src.procedures[it]!!))
+                }
+                result.addTask(BuildServerZipTask(src.taskArgs))
+            }
+            else -> {}
         }
         return result
     }

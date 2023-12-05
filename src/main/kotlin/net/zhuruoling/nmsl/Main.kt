@@ -23,20 +23,28 @@ fun main(args: Array<String>) {
     val runtime = ManagementFactory.getRuntimeMXBean()
     logger.info("${getVersionInfoString()} is running on ${os.name} ${os.arch} ${os.version} at pid ${runtime.pid}")
     val argList = args.toList()
+    var index = 0
     val file = File(
         try {
-            argList.last()
+            argList[0].apply { index++ }
         } catch (_: Exception) {
             "build.server.kts"
         }
     )
+    val action = try {
+            argList[index].apply { index++ }
+        } catch (_: Exception) {
+            "runServer"
+        }
+    val taskArgs = args.toList().subList(index,args.size)
+
     if (!file.exists()) {
         logger.error("Cannot find server configure script: $file")
         return
     }
     logger.info("Evaluating script: $file")
 
-   timer("Evaluate script") { evalFile(file) }.apply {
+    timer("Evaluate script") { evalFile(file) }.apply {
         reports.forEach {
             when (it.severity) {
                 ScriptDiagnostic.Severity.DEBUG -> {
@@ -62,6 +70,8 @@ fun main(args: Array<String>) {
         }
         this.onSuccess { result ->
             val serverConfig = (result.returnValue.scriptInstance as ScriptDef).serverConfig
+            serverConfig.action = action
+            serverConfig.taskArgs = taskArgs
             configureServer(serverConfig)
             this
         }
@@ -71,13 +81,13 @@ fun main(args: Array<String>) {
     }
 }
 
-fun getServerDir():Path{
-    return Path.of(".",System.getProperty("serverDir") ?: "server")
+fun getServerDir(): Path {
+    return Path.of(".", System.getProperty("serverDir") ?: "server")
 }
 
-fun configureServer(serverConfig: MinecraftServerConfig){
+fun configureServer(serverConfig: MinecraftServerConfig) {
     //logger.info(GsonBuilder().setPrettyPrinting().create().toJson(serverConfig))
-    val taskList = timer("Schedule server configure resolution"){ MinecraftServerTaskScheduler.schedule(serverConfig) }
+    val taskList = timer("Schedule server configure resolution") { MinecraftServerTaskScheduler.schedule(serverConfig) }
     logger.info("A server configure resolution has been determined.")
     taskList.forEach {
         logger.info("\t${it.describe()}")

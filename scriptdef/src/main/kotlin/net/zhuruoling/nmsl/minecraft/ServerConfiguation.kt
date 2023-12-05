@@ -6,12 +6,14 @@ import net.zhuruoling.nmsl.minecraft.mod.repo.ModRepository
 import kotlin.script.experimental.jvm.util.scriptCompilationClasspathFromContext
 
 class MinecraftServerConfig {
+    var taskArgs: List<String> = mutableListOf()
     var modRepositories: HashSet<ModRepository> = HashSet()
     var version: String = "latestStable"
     var modLoader: ModLoader? = null
     var mods: HashSet<ModItem> = HashSet()
     var procedures: MutableMap<String, () -> Unit>  = mutableMapOf()
     var launchConfiguration = ServerLaunchConfiguration()
+    var action = "runServer"
     override fun toString(): String {
         return "MinecraftServerConfig(modRepositories=${
             modRepositories.joinToString(
