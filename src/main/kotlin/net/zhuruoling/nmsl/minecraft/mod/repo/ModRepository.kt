@@ -3,10 +3,18 @@ package net.zhuruoling.nmsl.minecraft.mod.repo
 import net.zhuruoling.nmsl.minecraft.mod.loader.ModLoader
 import java.lang.IllegalArgumentException
 
-data class Mod(val minecraftVersion: String, val modLoader: ModLoader, val modId: String, val downloadUrl: String)
+data class Mod(
+    val minecraftVersion: String,
+    val modLoader: ModLoader,
+    val modId: String,
+    val downloadUrl: String,
+    val fileSha1: String,
+    val fileSize:Long,
+    val fileName:String
+)
 
 abstract class ModRepository(val id: String) {
-    abstract fun findMod(minecraftVersion: String, modLoader: ModLoader, modId: String): Mod?
+    abstract fun findMod(minecraftVersion: String, modLoader: ModLoader, modId: String, modVersion: String): Mod?
 
     override fun hashCode(): Int {
         return id.hashCode()

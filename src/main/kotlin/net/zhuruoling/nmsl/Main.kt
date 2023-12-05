@@ -1,10 +1,13 @@
 package net.zhuruoling.nmsl
 
+import net.zhuruoling.nmsl.cache.CacheProvider
+import net.zhuruoling.nmsl.mcversion.MinecraftVersion
 import net.zhuruoling.nmsl.minecraft.MinecraftServerConfig
 import net.zhuruoling.nmsl.scripting.ScriptDef
 import net.zhuruoling.nmsl.scripting.evalFile
 import net.zhuruoling.nmsl.task.TaskRunner
 import net.zhuruoling.nmsl.task.minecraft.MinecraftServerTaskScheduler
+import net.zhuruoling.nmsl.task.minecraft.ServerConfigureTaskContext
 import net.zhuruoling.nmsl.util.getVersionInfoString
 import net.zhuruoling.nmsl.util.timer
 import org.slf4j.LoggerFactory
@@ -22,6 +25,14 @@ fun main(args: Array<String>) {
     val os = ManagementFactory.getOperatingSystemMXBean()
     val runtime = ManagementFactory.getRuntimeMXBean()
     logger.info("${getVersionInfoString()} is running on ${os.name} ${os.arch} ${os.version} at pid ${runtime.pid}")
+    CacheProvider.init()
+    try{
+        logger.info("Updating Minecraft version cache.")
+        MinecraftVersion.update()
+    }catch (e:Exception){
+        logger.error("Cannot update minecraft version info.", e)
+        return
+    }
     val argList = args.toList()
     var index = 0
     val file = File(
@@ -76,7 +87,7 @@ fun main(args: Array<String>) {
             this
         }
         this.onFailure {
-            logger.error("Server configure resolution has failed!")
+            logger.error("Script evaluation failed with multiple errors.")
         }
     }
 }
@@ -92,5 +103,8 @@ fun configureServer(serverConfig: MinecraftServerConfig) {
     taskList.forEach {
         logger.info("\t${it.describe()}")
     }
-    //taskRunner.runTaskList(taskList, ServerConfigureTaskContext(MinecraftServerTaskScheduler, serverConfig, getServerDir()))
+    logger.info("Executing tasks.")
+
+    taskRunner.runTaskList(taskList, ServerConfigureTaskContext(MinecraftServerTaskScheduler, serverConfig, getServerDir()))
+
 }

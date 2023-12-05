@@ -2,7 +2,7 @@ package net.zhuruoling.nmsl.minecraft.mod.loader
 
 import java.lang.IllegalArgumentException
 
-class ModLoader(private val id: String, private val version:String, val installer: ModLoaderInstaller) {
+class ModLoader(val id: String, val version:String, val installer: ModLoaderInstaller) {
     override fun toString(): String {
         return "$id[Version:$version]"
     }

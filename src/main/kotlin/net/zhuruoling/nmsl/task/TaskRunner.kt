@@ -11,68 +11,80 @@ import java.util.concurrent.locks.LockSupport
 
 class TaskRunner {
     private val maxConcurrentTaskCount: Int = System.getenv("maxConcurrentTaskCount")?.toIntOrNull() ?: 4
+    private val logger: Logger = LoggerFactory.getLogger("TaskRunner")
+    private val executor: ExecutorService = Executors.newFixedThreadPool(maxConcurrentTaskCount)
 
-    val logger: Logger = LoggerFactory.getLogger("TaskRunner")
-    val executor: ExecutorService = Executors.newFixedThreadPool(maxConcurrentTaskCount)
+    private fun withTimer(message: String, block: () -> Unit) {
+        val begin = System.currentTimeMillis()
+        val ret = block()
+        val end = System.currentTimeMillis()
+        logger.info("$message finished in ${end - begin} milliseconds.")
+        return ret
+    }
 
-    inline fun <reified E> runTaskList(list: List<Task<E, TaskContext<E>>>, context: TaskContext<E>) {
+    fun <E> runTaskList(list: List<Task<E, TaskContext<E>>>, context: TaskContext<E>) {
         val taskStack = Stack<Task<E, TaskContext<E>>>()
         list.reversed().forEach {
             taskStack.push(it)
         }
         while (taskStack.isNotEmpty()) {
             if (taskStack.peek().isBlockingTask) {
-                taskStack.pop().apply {
-                    logger.info("Task: ${describe()}")
-                    run(context)
+                try {
+                    val task = taskStack.pop()
+                    val taskMessage = "Task: ${task.describe()}"
+                    withTimer(taskMessage) {
+                        logger.info(taskMessage)
+                        task.run(context)
+                    }
+                } catch (e: Throwable) {
+                    throw RuntimeException("Task execution failed: $e", e)
                 }
-            } else {
-                val conTask = mutableListOf<Task<E, TaskContext<E>>>()
-                while (!taskStack.peek().isBlockingTask) {
-                    conTask += taskStack.pop()
-                }
-                val futures = mutableMapOf<Future<*>, Task<*, *>>()
-                conTask.forEach {
-                    futures += executor.submit {
-                        it.apply {
-                            logger.info("Task: ${describe()}")
-                            run(context)
-                        }
-                    } to it
-                }
-                waitTask(futures)
+                continue
             }
+            val conTask = mutableListOf<Task<E, TaskContext<E>>>()
+            while (!taskStack.peek().isBlockingTask) {
+                conTask += taskStack.pop()
+            }
+            val futures = mutableMapOf<Future<*>, Task<*, *>>()
+            conTask.forEach {
+                futures += executor.submit {
+                    val taskMessage = "Task: ${it.describe()}"
+                    withTimer(taskMessage) {
+                        logger.info(taskMessage)
+                        it.run(context)
+                    }
+                } to it
+            }
+            waitTask(futures)
         }
     }
 
-    fun waitTask(futures: Map<Future<*>, Task<*, *>>) {
+    private fun waitTask(futures: Map<Future<*>, Task<*, *>>) {
         val keys = futures.keys.toMutableList()
         val remove = mutableListOf<Future<*>>()
-        val result = mutableMapOf<Throwable, Task<*,*>>()
-        while (futures.isNotEmpty()) {
+        val exceptions = mutableMapOf<Throwable, Task<*, *>>()
+        while (keys.isNotEmpty()) {
             keys.forEach {
-                if (it.isDone) {
-                    try {
-                        it.get()
-                    } catch (e: ExecutionException) {
-                        result += e.cause!! to futures[it]!!
-                    }
-                    remove += it
+                if (!it.isDone) return@forEach
+                try {
+                    it.get()
+                } catch (e: ExecutionException) {
+                    exceptions += e.cause!! to futures[it]!!
                 }
+                remove += it
             }
             keys.removeAll(remove)
             remove.clear()
             LockSupport.parkNanos(100)
         }
-        if (result.isNotEmpty()) {
-            throw RuntimeException(buildString {
-                append("Task execution failed caused by multiple exceptions:\n")
-                result.forEach { k, v ->
-                    append("Task: ${v.describe()} : $k")
-                }
-            }).apply {
-                result.keys.forEach(this::addSuppressed)
+        if (exceptions.isEmpty()) return
+        throw RuntimeException(buildString {
+            append("Task execution failed caused by multiple exceptions:\n")
+            exceptions.forEach { (k, v) ->
+                append("Task: ${v.describe()} : $k")
             }
+        }).apply {
+            exceptions.keys.forEach(this::addSuppressed)
         }
     }
 }

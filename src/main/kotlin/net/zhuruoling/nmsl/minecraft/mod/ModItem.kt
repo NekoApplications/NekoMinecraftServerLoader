@@ -27,7 +27,7 @@ class ModsConfigurationHandlerScope(private val set: HashSet<ModItem>) {
 }
 
 class ModItemConfigurationHandlerScope(private val modid: String, private val parent: ModsConfigurationHandlerScope) {
-    var version = "latestStable"
+    var version = "latest"
     private var rename: String? = null
 
     init {

@@ -11,12 +11,12 @@ object MinecraftServerTaskScheduler: TaskScheduler<MinecraftServerConfig>() {
         result.addTask(PrepareEnvTask())
         result.addTask(DownloadServerJarTask(src.version))
         if (src.modLoader != null) {
-            result.addTask(InstallModLoaderTask(src.modLoader!!))
+            result.addTask(DownloadModLoaderInstallerTask(src.modLoader!!))
             src.mods.forEach {
                 result.addTask(DownloadModTask(it, src.modRepositories))
             }
+            result.addTask(InstallModLoaderTask(src.modLoader!!))
         }
-
         when(src.action){
             "runServer" -> {
                 src.launchConfiguration.beforeExecutes.forEach {
