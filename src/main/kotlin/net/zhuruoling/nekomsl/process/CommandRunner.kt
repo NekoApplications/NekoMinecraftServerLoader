@@ -97,7 +97,6 @@ class ProcessDaemon(
                 synchronized(queue) {
                     if (queue.isNotEmpty()) {
                         queue.forEach {
-                            logger.info("input $it")
                             writer.write(it + "\n")
                             writer.flush()
                         }
@@ -116,7 +115,6 @@ class ProcessDaemon(
     fun input(str: String) {
         synchronized(queue) {
             queue.add(str)
-            logger.info("enqueue $str")
         }
     }
 
