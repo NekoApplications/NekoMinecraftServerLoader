@@ -29,10 +29,10 @@ fun main(args: Array<String>) {
     logger.info("${getVersionInfoString()} is running on ${os.name} ${os.arch} ${os.version} at pid ${runtime.pid}")
     CacheProvider.init()
     Console.start()
-    try{
+    try {
         logger.info("Updating Minecraft version cache.")
         MinecraftVersion.update()
-    }catch (e:Exception){
+    } catch (e: Exception) {
         logger.error("Update minecraft version info failed.", e)
         return
     }
@@ -46,11 +46,11 @@ fun main(args: Array<String>) {
         }
     )
     val action = try {
-            argList[index].apply { index++ }
-        } catch (_: Exception) {
-            "runServer"
-        }
-    val taskArgs = args.toList().subList(index,args.size)
+        argList[index].apply { index++ }
+    } catch (_: Exception) {
+        "runServer"
+    }
+    val taskArgs = args.toList().subList(index, args.size)
 
     if (!file.exists()) {
         logger.error("Server configure script $file not found.")
@@ -101,16 +101,25 @@ fun getServerDir(): Path {
 
 fun configureServer(serverConfig: MinecraftServerConfig) {
     //logger.info(GsonBuilder().setPrettyPrinting().create().toJson(serverConfig))
-    val taskList = timer("Schedule server configure resolution") { MinecraftServerTaskScheduler.schedule(serverConfig) }
-    logger.info("A server configure resolution has been determined.")
+    val taskList =
+        try {
+            timer("Schedule server configure tasks") { MinecraftServerTaskScheduler.schedule(serverConfig) }
+        }catch (e:Exception){
+            logger.error("Server configure tasks resolution failed with an exception.", e)
+            exitProcess(1)
+        }
+    logger.info("Tasks of server configure has been scheduled.")
     taskList.forEach {
         logger.info("\t${it.describe()}")
     }
     logger.info("Executing tasks.")
     try {
-        taskRunner.runTaskList(taskList, ServerConfigureTaskContext(MinecraftServerTaskScheduler, serverConfig, getServerDir()))
+        taskRunner.runTaskList(
+            taskList,
+            ServerConfigureTaskContext(MinecraftServerTaskScheduler, serverConfig, getServerDir())
+        )
         exitProcess(0)
-    }catch (e:Exception){
+    } catch (e: Exception) {
         logger.error("Task execution failed with an exception.", e)
         exitProcess(1)
     }

@@ -16,6 +16,10 @@ object MinecraftServerTaskScheduler: TaskScheduler<MinecraftServerConfig>() {
                 result.addTask(DownloadModTask(it, src.modRepositories))
             }
             result.addTask(InstallModLoaderTask(src.modLoader!!))
+        }else{
+            if (src.mods.isNotEmpty()){
+                throw IllegalArgumentException("Mods are required to install but no mod loader specified!")
+            }
         }
         result.addTask(AssembleServerTask())
         when(src.action){
