@@ -26,7 +26,7 @@ publishing {
 }
 
 application {
-    mainClass.set("net.zhuruoling.nmsl.MainKt")
+    mainClass.set("net.zhuruoling.nekomsl.MainKt")
 }
 
 description = "neko-minecraft-server-loader"
@@ -49,7 +49,7 @@ tasks {
 
 dependencies {
     implementation("uk.org.lidalia:sysout-over-slf4j:1.0.2")
-    implementation("org.jline:jline:3.21.0")
+    implementation("org.jline:jline:3.24.1")
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("org.slf4j:slf4j-api:1.7.36")
     implementation("ch.qos.logback:logback-classic:1.2.11")

@@ -4,7 +4,7 @@
     <contextName>omms-central</contextName>
     <property name="LOG_HOME" value="logs"/>
     <conversionRule conversionWord="customColor"
-                   converterClass="net.zhuruoling.nmsl.util.logging.LogbackCustomColor"/>
+                   converterClass="net.zhuruoling.nekomsl.util.logging.LogbackCustomColor"/>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
