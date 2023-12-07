@@ -3,6 +3,7 @@ package net.zhuruoling.nekomsl.util
 import com.google.gson.GsonBuilder
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J
 import java.io.File
 import java.security.MessageDigest
 import java.util.*
@@ -37,4 +38,15 @@ fun File.sha1(): String {
 
 fun findJavaExecutable():String{
     return "java"
+}
+
+fun <T> withStdoutRedirectedToSlf4j(block: () -> T):T{
+    try {
+        SysOutOverSLF4J.sendSystemOutAndErrToSLF4J()
+        return block()
+    }catch (e:Exception){
+        throw e
+    }finally {
+        SysOutOverSLF4J.stopSendingSystemOutAndErrToSLF4J()
+    }
 }

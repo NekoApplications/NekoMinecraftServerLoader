@@ -5,6 +5,8 @@ import cn.hutool.http.HttpUtil
 import net.zhuruoling.nekomsl.cache.CacheProvider
 import net.zhuruoling.nekomsl.cache.FileMetadata
 import net.zhuruoling.nekomsl.task.minecraft.ServerConfigureTaskContext
+import net.zhuruoling.nekomsl.util.withStdoutRedirectedToSlf4j
+import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J
 import java.net.URLClassLoader
 import java.nio.file.Path
 import java.util.regex.Pattern
@@ -35,7 +37,9 @@ object FabricModLoaderInstaller : ModLoaderInstaller("fabric") {
             "-loader",
             loaderVersion
         )
-        mainMethod.invoke(main, args)
+        withStdoutRedirectedToSlf4j {
+            mainMethod.invoke(main, args)
+        }
         val originalServerJar = CacheProvider.requireFile(context.serverJar)
         val targetServerJar = context.serverRoot / context.serverJar
         targetServerJar.deleteIfExists()

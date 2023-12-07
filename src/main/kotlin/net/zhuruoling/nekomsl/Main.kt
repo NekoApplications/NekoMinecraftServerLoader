@@ -91,6 +91,7 @@ fun main(args: Array<String>) {
         }
         this.onFailure {
             logger.error("Script evaluation failed with multiple errors.")
+            exitProcess(1)
         }
     }
 }
