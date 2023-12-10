@@ -24,11 +24,11 @@ private val logger = LoggerFactory.getLogger("Main")
 private val taskRunner = TaskRunner()
 
 fun main(args: Array<String>) {
+    Console.start()
     val os = ManagementFactory.getOperatingSystemMXBean()
     val runtime = ManagementFactory.getRuntimeMXBean()
     logger.info("${getVersionInfoString()} is running on ${os.name} ${os.arch} ${os.version} at pid ${runtime.pid}")
     CacheProvider.init()
-    Console.start()
     try {
         logger.info("Updating Minecraft version cache.")
         MinecraftVersion.update()

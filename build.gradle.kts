@@ -58,17 +58,13 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
     implementation("commons-io:commons-io:2.11.0")
     implementation("cn.hutool:hutool-all:5.8.11")
-
-    implementation("org.jetbrains.kotlin:kotlin-scripting-common")
-    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm")
-    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host")
     implementation("commons-codec:commons-codec:1.16.0")
 
+    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host")
     implementation("org.jetbrains.kotlin:kotlin-scripting-common")
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm")
     implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies")
     implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven")
-    // coroutines dependency is required for this particular definition
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 
 }
