@@ -81,7 +81,7 @@ class TaskRunner {
         throw RuntimeException(buildString {
             append("Task execution failed caused by multiple exceptions:")
             exceptions.forEach { (k, v) ->
-                append("\nTask: ${v.describe()} : $k")
+                append("\n ==> Task: ${v.describe()} : ${k.toString().replace("\n", "\n\t")}")
             }
         }).apply {
             exceptions.keys.forEach(this::addSuppressed)
