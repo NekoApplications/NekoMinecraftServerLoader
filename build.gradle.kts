@@ -11,7 +11,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "net.zhuruoling"
+group = "icu.takeneko"
 version = properties["version"]!!
 
 publishing {
@@ -26,7 +26,7 @@ publishing {
 }
 
 application {
-    mainClass.set("net.zhuruoling.nekomsl.MainKt")
+    mainClass.set("icu.takeneko.nekomsl.MainKt")
 }
 
 description = "neko-minecraft-server-loader"

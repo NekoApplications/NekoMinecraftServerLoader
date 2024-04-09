@@ -4,31 +4,32 @@
 
 ## Supported Minecraft Server Types
 
- - √ Vanilla
+- √ Vanilla
 
 ## Supported ModLoaders
 
- - √ [Fabric](https://fabricmc.net/) 
- - × [Forge](https://forums.minecraftforge.net/) (Working in progress)
- - × [Neoforge](https://neoforged.net/) (Working in progress)
- - × [Quilt](https://quiltmc.org/) (Working in progress)
+- √ [Fabric](https://fabricmc.net/)
+- × [Forge](https://forums.minecraftforge.net/) (Working in progress)
+- × [Neoforge](https://neoforged.net/) (Working in progress)
+- × [Quilt](https://quiltmc.org/) (Working in progress)
 
 ## Supported Mod Repositories
 
- - √ [Modrinth](https://modrinth.com/)
- - × [Curseforge]() (Working in progress)
+- √ [Modrinth](https://modrinth.com/)
+- × [Curseforge]() (Working in progress)
 
 ## CLI Arguments
 
 ```bash
-java -jar <NekoMinecraftServerLoader_jarfile> <scriptName> <action> <actionArgs>
+java -jar <NekoMinecraftServerLoader_jarfile> <action>
 ```
 
-- `<action>`:
-    - `runServer`
-    - `buildServerZip`
-        - `<actionArgs>`:
-            - -o `<outputZipName>`
+Argument `action` can be `runServer` or `buildServerZip`.
+
+| Action           | Argument 1                 | Arg default     |
+|------------------|----------------------------|-----------------|
+| `runServer`      | No args                    |                 |
+| `buildServerZip` | `-o [Server zip FileName]` | `-o server.zip` |
 
 If no arguments are provided, scriptName will be default to `build.server.kts`, action will be default to `runServer`
 
