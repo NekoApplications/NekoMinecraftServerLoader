@@ -22,6 +22,7 @@ object MinecraftServerTaskScheduler: TaskScheduler<MinecraftServerConfig>() {
             }
         }
         result.addTask(AssembleServerTask())
+        result.addTask(GenerateSummaryTask())
         when(src.action){
             "runServer" -> {
                 src.launchConfiguration.beforeExecutes.forEach {

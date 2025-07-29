@@ -1,6 +1,8 @@
 package icu.takeneko.nekomsl.task.minecraft
 
 import icu.takeneko.nekomsl.minecraft.MinecraftServerConfig
+import icu.takeneko.nekomsl.minecraft.mod.loader.ModLoader
+import icu.takeneko.nekomsl.minecraft.mod.repo.Mod
 import icu.takeneko.nekomsl.task.Task
 import icu.takeneko.nekomsl.task.TaskContext
 import icu.takeneko.nekomsl.task.TaskScheduler
@@ -14,13 +16,37 @@ class ServerConfigureTaskContext(
     source: MinecraftServerConfig,
     val serverRoot: Path,
     val logger: Logger = LoggerFactory.getLogger("ServerConfigure"),
-) : TaskContext<MinecraftServerConfig>(scheduler, source){
+    val configureSummary: ServerConfigurationSummary = ServerConfigurationSummary()
+) : TaskContext<MinecraftServerConfig>(scheduler, source) {
     lateinit var serverJar: String
-    lateinit var modLoaderInstallerPath:Path
+    lateinit var modLoaderInstallerPath: Path
     val modFileNameMap = mutableMapOf<String, String>()
 }
 
-abstract class ServerConfigureTask: Task<MinecraftServerConfig, ServerConfigureTaskContext>(){
+data class ServerConfigurationSummary(
+    var serverVersion: String = "UNDEFINED",
+    var modLoader: ModLoader? = null,
+    val mods: MutableList<Mod> = mutableListOf()
+) {
+    fun text(): String {
+        return buildString {
+            appendLine("Server Configuration Summary")
+            appendLine()
+            appendLine("Minecraft Version: $serverVersion")
+            if (modLoader != null) {
+                appendLine("ModLoader: ${modLoader!!.id} ${modLoader!!.version}")
+                appendLine()
+                appendLine("Mods:")
+                for (mod in mods) {
+                    appendLine("    - ${mod.modId} ${mod.version} (${mod.fileName}) (sha1:${mod.fileSha1})")
+                }
+            }
+
+        }
+    }
+}
+
+abstract class ServerConfigureTask : Task<MinecraftServerConfig, ServerConfigureTaskContext>() {
     override val isBlockingTask: Boolean
         get() = true
 }

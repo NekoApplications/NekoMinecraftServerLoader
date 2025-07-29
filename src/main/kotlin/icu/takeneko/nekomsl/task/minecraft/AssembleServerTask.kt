@@ -1,18 +1,23 @@
 package icu.takeneko.nekomsl.task.minecraft
 
-import cn.hutool.core.bean.copier.CopyOptions
 import cn.hutool.core.io.FileUtil
 import icu.takeneko.nekomsl.cache.CacheProvider
 import icu.takeneko.nekomsl.util.sha1
 import org.apache.commons.io.FileUtils
-import java.nio.file.CopyOption
 import java.nio.file.StandardCopyOption
-import kotlin.io.path.*
+import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.div
+import kotlin.io.path.exists
 
 class AssembleServerTask : ServerConfigureTask() {
     override fun run(context: ServerConfigureTaskContext) {
         val serverRoot = context.serverRoot
+        context.configureSummary.serverVersion = context.source.version
         if (context.source.modLoader != null) {
+            context.configureSummary.modLoader = context.source.modLoader
             val modsDir = serverRoot / "mods"
             if (modsDir.exists()) {
                 FileUtils.deleteDirectory(modsDir.toFile())
