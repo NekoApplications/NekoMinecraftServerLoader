@@ -1,18 +1,17 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.util.capitalizeDecapitalize.toUpperCaseAsciiOnly
 import java.io.ByteArrayOutputStream
+import java.util.Locale.getDefault
 
 plugins {
     `java-library`
-    kotlin("jvm") version "1.9.20"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
     java
     application
     id("maven-publish")
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.shadow)
 }
 
 group = "icu.takeneko"
-version = properties["version"]!!
+version = project.property("version")!!
 
 publishing {
     repositories {
@@ -26,14 +25,14 @@ publishing {
 }
 
 application {
-    mainClass.set("icu.takeneko.nekomsl.MainKt")
+    mainClass.set("${group}.nekomsl.MainKt")
 }
 
 description = "neko-minecraft-server-loader"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_25
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+kotlin {
+    jvmToolchain(25)
 }
 
 repositories {
@@ -48,25 +47,17 @@ tasks {
 }
 
 dependencies {
-    implementation("uk.org.lidalia:sysout-over-slf4j:1.0.2")
-    implementation("org.jline:jline:3.24.1")
-    implementation("com.google.code.gson:gson:2.9.0")
-    implementation("org.slf4j:slf4j-api:1.7.36")
-    implementation("ch.qos.logback:logback-classic:1.2.11")
-    implementation("ch.qos.logback:logback-core:1.2.11")
-    implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
-    implementation("commons-io:commons-io:2.11.0")
-    implementation("cn.hutool:hutool-all:5.8.11")
-    implementation("commons-codec:commons-codec:1.16.0")
-
-    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host")
-    implementation("org.jetbrains.kotlin:kotlin-scripting-common")
-    implementation("org.jetbrains.kotlin:kotlin-scripting-jvm")
-    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies")
-    implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies-maven")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-
+    implementation(libs.jline)
+    implementation(libs.gson)
+    implementation(libs.slf4j)
+    implementation(libs.sysoutOverSlf4j)
+    implementation(libs.bundles.logback)
+    implementation(libs.jetbrains.annotations)
+    implementation(libs.commons.io)
+    implementation(libs.commons.codec)
+    implementation(libs.hutool)
+    implementation(libs.kotlinx.coroutines)
+    implementation(libs.bundles.kotlinScriping)
 }
 
 subprojects{
@@ -76,15 +67,14 @@ subprojects{
     }
 }
 
+tasks.getByName("processResources") {
+    dependsOn("generateProperties")
+}
 
 task("generateProperties") {
     doLast {
         generateProperties()
     }
-}
-
-tasks.getByName("processResources") {
-    dependsOn("generateProperties")
 }
 
 fun getGitBranch(): String {
@@ -116,9 +106,9 @@ fun generateProperties() {
         properties.forEach {
             val str = it.value.toString()
             if ("@" in str || "(" in str || ")" in str || "extension" in str || "null" == str || "\'" in str || "\\" in str || "/" in str) return@forEach
-            if ("PROJECT" in str.toUpperCaseAsciiOnly() || "PROJECT" in it.key.toUpperCaseAsciiOnly() || " " in str) return@forEach
-            if ("GRADLE" in it.key.toUpperCaseAsciiOnly() || "GRADLE" in str.toUpperCaseAsciiOnly() || "PROP" in it.key.toUpperCaseAsciiOnly()) return@forEach
-            if ("." in it.key || "TEST" in it.key.toUpperCaseAsciiOnly()) return@forEach
+            if ("PROJECT" in str.uppercase(getDefault()) || "PROJECT" in it.key.uppercase(getDefault()) || " " in str) return@forEach
+            if ("GRADLE" in it.key.uppercase(getDefault()) || "GRADLE" in str.uppercase(getDefault()) || "PROP" in it.key.uppercase(getDefault())) return@forEach
+            if ("." in it.key || "TEST" in it.key.uppercase(getDefault())) return@forEach
             if (it.value.toString().length <= 2) return@forEach
             m += it.key to str
         }
