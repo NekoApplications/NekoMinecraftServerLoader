@@ -1,7 +1,9 @@
 package icu.takeneko.nekomsl.cache
 
-import cn.hutool.core.io.FileUtil
-import icu.takeneko.nekomsl.util.gson
+import icu.takeneko.nekomsl.util.json
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import icu.takeneko.nekomsl.util.sha1
 import org.slf4j.LoggerFactory
 import java.net.URL
@@ -26,29 +28,29 @@ object CacheProvider {
                 it.createDirectories()
             }
         }
-        FileUtil.ls(cacheDownloadRoot.toAbsolutePath().toString()).forEach {
+        cacheDownloadRoot.listDirectoryEntries().forEach {
             val fileNameWithExt = it.name
             if ((cacheFileMetaRoot / "$fileNameWithExt.json").notExists()) {
                 logger.warn("Cannot find associated file metadata of $fileNameWithExt at $cacheFileMetaRoot.")
-                it.delete()
+                it.deleteIfExists()
             }
         }
-        FileUtil.ls(cacheFileMetaRoot.toAbsolutePath().toString()).forEach {
+        cacheFileMetaRoot.listDirectoryEntries().forEach {
             val fileNameWithExt = it.name
             if ((cacheDownloadRoot / fileNameWithExt.removeSuffix(".json")).notExists()) {
                 logger.warn("Cannot find associated file of $fileNameWithExt at $cacheDownloadRoot.")
-                it.delete()
+                it.deleteIfExists()
                 return@forEach
             }
             try {
                 it.reader().use { reader ->
-                    gson.fromJson(reader, FileMetadata::class.java).apply {
+                    json.decodeFromString<FileMetadata>(reader.readText()).apply {
                         caches[fileName] = this
                     }
                 }
             } catch (e: Exception) {
                 logger.warn("Cannot load file metadata from $it, caused by $e")
-                it.delete()
+                it.deleteIfExists()
             }
         }
 
@@ -82,7 +84,7 @@ object CacheProvider {
             deleteIfExists()
             createFile()
             writer().use {
-                gson.toJson(meta, it)
+                it.write(json.encodeToString(meta))
             }
         }
         outputFilePath.apply {
@@ -112,4 +114,5 @@ object CacheProvider {
     }
 }
 
+@Serializable
 data class FileMetadata(val fileName: String, val downloadUrl: String, val fileSize: Long, val fileHashSha1: String)

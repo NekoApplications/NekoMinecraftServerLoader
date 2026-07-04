@@ -1,5 +1,4 @@
-import java.io.ByteArrayOutputStream
-import java.util.Locale.getDefault
+import java.util.Locale
 
 plugins {
     `java-library`
@@ -7,6 +6,7 @@ plugins {
     application
     id("maven-publish")
     alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.shadow)
 }
 
@@ -25,7 +25,7 @@ publishing {
 }
 
 application {
-    mainClass.set("${group}.nekomsl.MainKt")
+    mainClass.set("${group}.nekomsl.DirectMainKt")
 }
 
 description = "neko-minecraft-server-loader"
@@ -48,15 +48,15 @@ tasks {
 
 dependencies {
     implementation(libs.jline)
-    implementation(libs.gson)
     implementation(libs.slf4j)
     implementation(libs.sysoutOverSlf4j)
     implementation(libs.bundles.logback)
     implementation(libs.jetbrains.annotations)
     implementation(libs.commons.io)
     implementation(libs.commons.codec)
-    implementation(libs.hutool)
     implementation(libs.kotlinx.coroutines)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlin.argparser)
     implementation(libs.bundles.kotlinScriping)
 }
 
@@ -67,32 +67,26 @@ subprojects{
     }
 }
 
-tasks.getByName("processResources") {
+tasks.named("processResources") {
     dependsOn("generateProperties")
 }
 
-task("generateProperties") {
+tasks.register("generateProperties") {
     doLast {
         generateProperties()
     }
 }
 
 fun getGitBranch(): String {
-    val stdout = ByteArrayOutputStream()
-    exec {
+    return providers.exec {
         commandLine("git", "symbolic-ref", "--short", "-q", "HEAD")
-        standardOutput = stdout
-    }
-    return stdout.toString(Charsets.UTF_8).trim()
+    }.standardOutput.asText.get().trim()
 }
 
 fun getCommitId(): String {
-    val stdout = ByteArrayOutputStream()
-    exec {
+    return providers.exec {
         commandLine("git", "rev-parse", "HEAD")
-        standardOutput = stdout
-    }
-    return stdout.toString(Charsets.UTF_8).trim()
+    }.standardOutput.asText.get().trim()
 }
 
 fun generateProperties() {
@@ -103,14 +97,14 @@ fun generateProperties() {
     propertiesFile.createNewFile()
     val m = mutableMapOf<String, String>()
     propertiesFile.printWriter().use { writer ->
-        properties.forEach {
-            val str = it.value.toString()
+        providers.gradlePropertiesPrefixedBy("").get().forEach { (key, str) ->
             if ("@" in str || "(" in str || ")" in str || "extension" in str || "null" == str || "\'" in str || "\\" in str || "/" in str) return@forEach
-            if ("PROJECT" in str.uppercase(getDefault()) || "PROJECT" in it.key.uppercase(getDefault()) || " " in str) return@forEach
-            if ("GRADLE" in it.key.uppercase(getDefault()) || "GRADLE" in str.uppercase(getDefault()) || "PROP" in it.key.uppercase(getDefault())) return@forEach
-            if ("." in it.key || "TEST" in it.key.uppercase(getDefault())) return@forEach
-            if (it.value.toString().length <= 2) return@forEach
-            m += it.key to str
+            if ("PROJECT" in str.uppercase(Locale.ROOT) || "PROJECT" in key.uppercase(Locale.ROOT) || " " in str) return@forEach
+            if ("GRADLE" in key.uppercase(Locale.ROOT) || "GRADLE" in str.uppercase(Locale.ROOT) || "PROP" in key.uppercase(Locale.ROOT)) return@forEach
+            if ("JRELEASER" in key.uppercase(Locale.ROOT)) return@forEach
+            if ("." in key || "TEST" in key.uppercase(Locale.ROOT)) return@forEach
+            if (str.length <= 2) return@forEach
+            m += key to str
         }
         m += "buildTime" to System.currentTimeMillis().toString()
         m += "branch" to getGitBranch()

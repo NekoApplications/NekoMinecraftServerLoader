@@ -1,9 +1,11 @@
 package icu.takeneko.nekomsl.minecraft.mod.repo
 
-import com.google.gson.annotations.SerializedName
 import icu.takeneko.nekomsl.minecraft.mod.loader.ModLoader
-import icu.takeneko.nekomsl.util.gson
+import icu.takeneko.nekomsl.util.json
 import icu.takeneko.nekomsl.util.userAgent
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import java.net.URL
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -28,7 +30,7 @@ object ModrinthModRepository : ModRepository("modrinth") {
     ): Pair<Mod?, List<Mod>> {
         val route = "project/$modId/version?loaders=[%22${modLoader.id}%22]&game_versions=[%22$minecraftVersion%22]"
         val responseJson = getApi(route) ?: return null to emptyList()
-        val response = gson.fromJson(responseJson, Array<ModrinthModItem>::class.java)
+        val response = json.decodeFromString<List<ModrinthModItem>>(responseJson)
         val alternative = try {
             if (response.isEmpty()) return null to emptyList()
             response.map {
@@ -58,15 +60,17 @@ object ModrinthModRepository : ModRepository("modrinth") {
         }
     }
 
+    @Serializable
     data class ModrinthModItem(
-        @SerializedName("version_number") val versionNumber: String,
-        @SerializedName("name") val name: String,
-        @SerializedName("version_type") val versionType: String,
-        @SerializedName("game_versions") val gameVersions: List<String>,
-        @SerializedName("loaders") val loaders: List<String>,
-        @SerializedName("files") val files: List<ModrinthModFileItem>
+        @SerialName("version_number") val versionNumber: String,
+        @SerialName("name") val name: String,
+        @SerialName("version_type") val versionType: String,
+        @SerialName("game_versions") val gameVersions: List<String>,
+        @SerialName("loaders") val loaders: List<String>,
+        @SerialName("files") val files: List<ModrinthModFileItem>
     )
 
+    @Serializable
     data class ModrinthModFileItem(
         val hashes: HashItem,
         val url: String,
@@ -75,5 +79,6 @@ object ModrinthModRepository : ModRepository("modrinth") {
         val size: Long
     )
 
+    @Serializable
     data class HashItem(val sha1: String, val sha256: String)
 }

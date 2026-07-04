@@ -3,17 +3,18 @@ package icu.takeneko.nekomsl.minecraft
 import icu.takeneko.nekomsl.minecraft.mod.ModItem
 import icu.takeneko.nekomsl.minecraft.mod.loader.ModLoader
 import icu.takeneko.nekomsl.minecraft.mod.repo.ModRepository
-import kotlin.script.experimental.jvm.util.scriptCompilationClasspathFromContext
+import icu.takeneko.nekomsl.scripting.action.ActionRegistry
+import icu.takeneko.nekomsl.scripting.action.ScriptAction
 
 class MinecraftServerConfig {
-    var taskArgs: List<String> = mutableListOf()
+    var taskArgs: Map<String, String> = mutableMapOf()
     var modRepositories: HashSet<ModRepository> = HashSet()
     var version: String = "latestStable"
     var modLoader: ModLoader? = null
     var mods: HashSet<ModItem> = HashSet()
     var procedures: MutableMap<String, () -> Unit>  = mutableMapOf()
     var launchConfiguration = ServerLaunchConfiguration()
-    var action = "runServer"
+    var action: ScriptAction = ActionRegistry.defaultAction
     override fun toString(): String {
         return "MinecraftServerConfig(modRepositories=${
             modRepositories.joinToString(

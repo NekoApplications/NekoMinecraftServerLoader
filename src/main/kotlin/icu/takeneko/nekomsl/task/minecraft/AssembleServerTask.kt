@@ -1,13 +1,10 @@
 package icu.takeneko.nekomsl.task.minecraft
 
-import cn.hutool.core.io.FileUtil
 import icu.takeneko.nekomsl.cache.CacheProvider
 import icu.takeneko.nekomsl.util.sha1
 import org.apache.commons.io.FileUtils
-import java.nio.file.StandardCopyOption
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.div
 import kotlin.io.path.exists
@@ -43,13 +40,10 @@ class AssembleServerTask : ServerConfigureTask() {
             if (serverJar.exists()) {
                 if (serverJar.toFile().sha1() != serverJarCache.toFile().sha1()) {
                     serverJar.deleteIfExists()
-                    serverJar.createFile()
-                    FileUtil.copy(serverJarCache, serverJar, StandardCopyOption.REPLACE_EXISTING)
+                    serverJarCache.copyTo(serverJar, overwrite = true)
                 }
             } else {
-                serverJar.deleteIfExists()
-                serverJar.createFile()
-                FileUtil.copy(serverJarCache, serverJar, StandardCopyOption.REPLACE_EXISTING)
+                serverJarCache.copyTo(serverJar, overwrite = true)
             }
         }
     }

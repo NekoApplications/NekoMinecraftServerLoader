@@ -1,28 +1,33 @@
 package icu.takeneko.nekomsl.task.minecraft
 
-import cn.hutool.core.util.ZipUtil
-import java.io.File
-import java.io.FileFilter
-import java.util.zip.ZipFile
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 
-class BuildServerZipTask(val args: List<String>) : ServerConfigureTask() {
-
-    private val outputFileName = if (args.isEmpty()) "server.zip" else try {
-        args[args.indexOf("-o") + 1]
-    } catch (e: Exception) {
-        "server.zip"
-    }
+class BuildServerZipTask(private val outputFileName: String) : ServerConfigureTask() {
 
     override fun run(context: ServerConfigureTaskContext) {
         val serverRoot = context.serverRoot
         val outputZipPath = Path(".") / outputFileName
         outputZipPath.deleteIfExists()
-        ZipUtil.zip(outputZipPath.toFile(), Charsets.UTF_8, true, { pathname ->
-            context.logger.info("Add: $pathname")
-            true
-        }, serverRoot.toFile())
+        ZipOutputStream(outputZipPath.outputStream(), Charsets.UTF_8).use { zip ->
+            Files.walk(serverRoot).use { paths ->
+                paths.filter { it != serverRoot }.forEach {
+                    val entryName = serverRoot.relativize(it).toString().replace('\\', '/')
+                    context.logger.info("Add: $it")
+                    if (it.isDirectory()) {
+                        zip.putNextEntry(ZipEntry("$entryName/"))
+                        zip.closeEntry()
+                    } else {
+                        zip.putNextEntry(ZipEntry(entryName))
+                        Files.copy(it, zip)
+                        zip.closeEntry()
+                    }
+                }
+            }
+        }
     }
 
     override fun describe(): String {

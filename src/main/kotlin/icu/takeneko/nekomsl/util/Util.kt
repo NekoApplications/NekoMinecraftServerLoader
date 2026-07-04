@@ -1,7 +1,6 @@
 package icu.takeneko.nekomsl.util
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import kotlinx.serialization.json.Json
 import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J
@@ -11,7 +10,11 @@ import java.util.*
 
 
 private val logger = LoggerFactory.getLogger("Util")
-val gson: Gson = GsonBuilder().setPrettyPrinting().serializeNulls().create()
+val json = Json {
+    prettyPrint = true
+    explicitNulls = true
+    ignoreUnknownKeys = true
+}
 val userAgent = "NekoApplications/NekoMinecraftServerLoader/${BuildProperties["version"]}-${BuildProperties["commitId"]?.substring(0, 7)}"
 
 fun <T> timer(message: String, block: () -> T): T {

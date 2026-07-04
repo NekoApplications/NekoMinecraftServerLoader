@@ -1,12 +1,11 @@
 package icu.takeneko.nekomsl.minecraft.mod.loader
 
-import cn.hutool.core.io.IORuntimeException
-import cn.hutool.http.HttpUtil
 import icu.takeneko.nekomsl.cache.CacheProvider
 import icu.takeneko.nekomsl.cache.FileMetadata
 import icu.takeneko.nekomsl.task.minecraft.ServerConfigureTaskContext
+import icu.takeneko.nekomsl.util.HttpUtil
 import icu.takeneko.nekomsl.util.withStdoutRedirectedToSlf4j
-import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J
+import java.net.URI
 import java.net.URLClassLoader
 import java.nio.file.Path
 import java.util.regex.Pattern
@@ -61,16 +60,15 @@ object FabricModLoaderInstaller : ModLoaderInstaller("fabric") {
 
     fun getLatestInstallerVersion(): String {
         try {
-            val mvnXml = HttpUtil.downloadString(
-                "https://maven.fabricmc.net/net/fabricmc/fabric-installer/maven-metadata.xml",
-                Charsets.UTF_8
-            ).replace("\n", "").replace("\r", "")
+            val mvnXml = HttpUtil.makeRequest(
+                URI.create("https://maven.fabricmc.net/net/fabricmc/fabric-installer/maven-metadata.xml")
+            ).body().bufferedReader(Charsets.UTF_8).use { it.readText() }.replace("\n", "").replace("\r", "")
             val matcher = versionRegex.matcher(mvnXml)
             if (!matcher.matches()) {
                 throw RuntimeException("Retrieve latest installer version from fabric maven failed.")
             }
             return matcher.group(1)
-        } catch (e: IORuntimeException) {
+        } catch (e: Exception) {
             throw RuntimeException("Retrieve latest installer version from fabric maven failed.", e)
         }
     }
@@ -80,7 +78,9 @@ object FabricModLoaderInstaller : ModLoaderInstaller("fabric") {
         val downloadUrl =
             "https://maven.fabricmc.net/net/fabricmc/fabric-installer/$latestInstallerVersion/fabric-installer-$latestInstallerVersion.jar"
         val sha1Url = "$downloadUrl.sha1"
-        val sha1 = HttpUtil.get(sha1Url)
+        val sha1 = HttpUtil.makeRequest(URI.create(sha1Url)).body().bufferedReader(Charsets.UTF_8).use {
+            it.readText()
+        }.trim()
         installerDownloadInfo = FileMetadata("fabric-installer-$latestInstallerVersion.jar", downloadUrl, 0L, sha1)
         return installerDownloadInfo
     }

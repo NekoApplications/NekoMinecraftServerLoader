@@ -23,30 +23,7 @@ object MinecraftServerTaskScheduler: TaskScheduler<MinecraftServerConfig>() {
         }
         result.addTask(AssembleServerTask())
         result.addTask(GenerateSummaryTask())
-        when(src.action){
-            "runServer" -> {
-                src.launchConfiguration.beforeExecutes.forEach {
-                    if (it !in src.launchConfiguration.beforeExecutes)
-                        throw IllegalArgumentException("Unresolved task reference: $it")
-                    result.addTask(RunProcedureTask(it, src.procedures[it]!!))
-                }
-                result.addTask(RunServerTask(src.launchConfiguration.jvmArgs, src.launchConfiguration.args))
-                src.launchConfiguration.afterExecutes.forEach {
-                    if (it !in src.launchConfiguration.afterExecutes)
-                        throw IllegalArgumentException("Unresolved task reference: $it")
-                    result.addTask(RunProcedureTask(it, src.procedures[it]!!))
-                }
-            }
-            "buildServerZip" -> {
-                src.launchConfiguration.beforeExecutes.forEach {
-                    if (it !in src.launchConfiguration.beforeExecutes)
-                        throw IllegalArgumentException("Unresolved task reference: $it")
-                    result.addTask(RunProcedureTask(it, src.procedures[it]!!))
-                }
-                result.addTask(BuildServerZipTask(src.taskArgs))
-            }
-            else -> {}
-        }
+        src.action.acceptTaskList(src, result)
         return result
     }
 }

@@ -30,3 +30,6 @@ replay_pid*
 
 # Ignore Gradle build output directory
 build
+
+# Runtime cache
+/cache

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Neko Minecraft Server Loader Metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metadataVersion",
+    "baseUrl",
+    "servers"
+  ],
+  "properties": {
+    "metadataVersion": {
+      "type": "integer",
+      "const": 0,
+      "description": "Metadata format version."
+    },
+    "baseUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "Base URL used to resolve server script paths."
+    },
+    "servers": {
+      "type": "object",
+      "description": "Map of server identifiers to script file paths relative to baseUrl.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[^\\\\\\s]+\\.kts$"
+      },
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@
     <contextName>omms-central</contextName>
     <property name="LOG_HOME" value="logs"/>
     <conversionRule conversionWord="customColor"
-                   converterClass="icu.takeneko.nekomsl.util.logging.LogbackCustomColor"/>
+                   class="icu.takeneko.nekomsl.util.logging.LogbackCustomColor"/>
 
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -19,13 +19,11 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+            <maxFileSize>1GB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>1GB</maxFileSize>
-        </triggeringPolicy>
         <encoder>
             <charset>UTF-8</charset>
             <pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%thread/%level] \(%logger{1}\): %msg%n</pattern>
