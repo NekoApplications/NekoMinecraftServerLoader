@@ -3,11 +3,11 @@ package icu.takeneko.nekomsl.ui
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class CounterStateTest {
+class CounterActivityTest {
 
     @Test
     fun incrementIncreasesCountByOne() {
-        val state = CounterState()
+        val state = CounterActivity()
 
         state.increment()
 
@@ -16,7 +16,7 @@ class CounterStateTest {
 
     @Test
     fun repeatedIncrementsAccumulate() {
-        val state = CounterState()
+        val state = CounterActivity()
 
         repeat(3) {
             state.increment()
